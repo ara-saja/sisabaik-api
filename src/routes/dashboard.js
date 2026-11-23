@@ -1,10 +1,6 @@
 import { Router } from "express";
 import { ringkasanDashboard } from "../services/dashboard.js";
-import {
-  wajibLogin,
-  wajibPeran,
-  wajibPenyediaTerverifikasi,
-} from "../middleware/auth.js";
+import { wajibLogin, wajibPeran, wajibPenyediaTerverifikasi } from "../middleware/auth.js";
 
 const router = Router();
 router.use(wajibLogin, wajibPeran("pembeli", "penyedia"));

@@ -1,15 +1,24 @@
 BEGIN;
-DROP TABLE IF EXISTS pengambilan, detail_pesanan, pesanan,
- penawaran, penyedia, pengguna CASCADE;
+
+DROP TABLE IF EXISTS
+    pengambilan,
+    detail_pesanan,
+    pesanan,
+    penawaran,
+    penyedia,
+    pengguna
+CASCADE;
+
 CREATE TABLE pengguna (
- id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
- nama_lengkap VARCHAR(100) NOT NULL,
- email VARCHAR(254) NOT NULL UNIQUE,
- peran VARCHAR(20) NOT NULL
- CHECK (peran IN ('penyedia', 'pembeli')),
- aktif BOOLEAN NOT NULL DEFAULT TRUE,
- dibuat_pada TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nama_lengkap VARCHAR(100) NOT NULL,
+    email VARCHAR(254) NOT NULL UNIQUE,
+    peran VARCHAR(20) NOT NULL,
+    CHECK (peran IN ('penyedia', 'pembeli')),
+    aktif BOOLEAN NOT NULL DEFAULT TRUE,
+    dibuat_pada TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
 CREATE TABLE penyedia (
  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  pengguna_id BIGINT NOT NULL UNIQUE
@@ -22,6 +31,7 @@ CREATE TABLE penyedia (
  CHECK (status_verifikasi IN ('menunggu', 'terverifikasi', 'ditolak')),
  dibuat_pada TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
 CREATE TABLE penawaran (
  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  penyedia_id BIGINT NOT NULL
@@ -30,8 +40,7 @@ CREATE TABLE penawaran (
  nama VARCHAR(120) NOT NULL,
  kategori VARCHAR(40) NOT NULL,
  harga_normal NUMERIC(12,0) NOT NULL CHECK (harga_normal > 0),
- harga_penawaran NUMERIC(12,0) NOT NULL
- CHECK (harga_penawaran >= 0 AND harga_penawaran <= harga_normal),
+ harga_penawaran NUMERIC(12,0) NOT NULL CHECK (harga_penawaran >= 0 AND harga_penawaran <= harga_normal),
  stok INTEGER NOT NULL CHECK (stok >= 0),
  satuan VARCHAR(20) NOT NULL,
  status VARCHAR(20) NOT NULL DEFAULT 'aktif'
@@ -42,6 +51,7 @@ CREATE TABLE penawaran (
  CONSTRAINT ck_penawaran_waktu
  CHECK (berakhir_pada > dibuat_pada)
 );
+
 CREATE TABLE pesanan (
  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  pembeli_id BIGINT NOT NULL
@@ -62,6 +72,7 @@ CREATE TABLE pesanan (
  dibuat_pada TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
  CONSTRAINT uq_pesanan_id_penyedia UNIQUE (id, penyedia_id)
 );
+
 CREATE TABLE detail_pesanan (
  pesanan_id BIGINT NOT NULL,
  penawaran_id BIGINT NOT NULL,
@@ -86,6 +97,7 @@ CREATE TABLE detail_pesanan (
  REFERENCES penawaran(id, penyedia_id)
  ON UPDATE CASCADE ON DELETE RESTRICT
 );
+
 CREATE TABLE pengambilan (
  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  pesanan_id BIGINT NOT NULL UNIQUE
@@ -104,4 +116,5 @@ CREATE INDEX idx_penawaran_status_berakhir
 CREATE INDEX idx_pesanan_pembeli ON pesanan(pembeli_id);
 CREATE INDEX idx_pesanan_penyedia ON pesanan(penyedia_id);
 CREATE INDEX idx_detail_penawaran ON detail_pesanan(penawaran_id);
+
 COMMIT;

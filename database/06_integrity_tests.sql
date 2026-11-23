@@ -4,54 +4,54 @@
 DO $$
 BEGIN
  BEGIN
-  INSERT INTO pengguna (nama_lengkap, email, peran)
-  VALUES ('Uji Peran', 'uji.peran@example.test', 'admin');
-  RAISE EXCEPTION 'FAIL: CHECK peran tidak bekerja';
-  EXCEPTION
-  WHEN check_violation THEN
-  RAISE NOTICE 'PASS: peran di luar daftar ditolak';
+ INSERT INTO pengguna (nama_lengkap, email, peran)
+ VALUES ('Uji Peran', 'uji.peran@example.test', 'admin');
+ RAISE EXCEPTION 'FAIL: CHECK peran tidak bekerja';
+ EXCEPTION
+ WHEN check_violation THEN
+ RAISE NOTICE 'PASS: peran di luar daftar ditolak';
  END;
 END;
 $$;
 DO $$
 BEGIN
  BEGIN
-  INSERT INTO penawaran (
-  penyedia_id, nama, kategori, harga_normal, harga_penawaran,
-  stok, satuan, status, berakhir_pada
-  ) VALUES (
-  1, 'Uji Harga', 'uji', 10000, 15000,
-  1, 'paket', 'aktif', CURRENT_TIMESTAMP + INTERVAL '1 hour'
+ INSERT INTO penawaran (
+ penyedia_id, nama, kategori, harga_normal, harga_penawaran,
+ stok, satuan, status, berakhir_pada
+ ) VALUES (
+ 1, 'Uji Harga', 'uji', 10000, 15000,
+ 1, 'paket', 'aktif', CURRENT_TIMESTAMP + INTERVAL '1 hour'
  );
-  RAISE EXCEPTION 'FAIL: CHECK harga tidak bekerja';
-  EXCEPTION
-  WHEN check_violation THEN
-  RAISE NOTICE 'PASS: harga penawaran di atas harga normal ditolak';
+ RAISE EXCEPTION 'FAIL: CHECK harga tidak bekerja';
+ EXCEPTION
+ WHEN check_violation THEN
+ RAISE NOTICE 'PASS: harga penawaran di atas harga normal ditolak';
  END;
 END;
 $$;
 DO $$
 BEGIN
  BEGIN
-  INSERT INTO detail_pesanan (
-  pesanan_id, penawaran_id, penyedia_id, kuantitas,
-  harga_normal_satuan, harga_penawaran_satuan
-  ) VALUES (1, 1, 1, 1, 30000, 15000);
-  RAISE EXCEPTION 'FAIL: FK pasangan penyedia tidak bekerja';
-  EXCEPTION
-  WHEN foreign_key_violation THEN
-  RAISE NOTICE 'PASS: penawaran dari penyedia lain ditolak';
+ INSERT INTO detail_pesanan (
+ pesanan_id, penawaran_id, penyedia_id, kuantitas,
+ harga_normal_satuan, harga_penawaran_satuan
+ ) VALUES (1, 1, 1, 1, 30000, 15000);
+ RAISE EXCEPTION 'FAIL: FK pasangan penyedia tidak bekerja';
+ EXCEPTION
+ WHEN foreign_key_violation THEN
+ RAISE NOTICE 'PASS: penawaran dari penyedia lain ditolak';
  END;
 END;
 $$;
 DO $$
 BEGIN
  BEGIN
-  DELETE FROM pengguna WHERE id = 1;
-  RAISE EXCEPTION 'FAIL: aturan ON DELETE RESTRICT tidak bekerja';
-  EXCEPTION
-  WHEN restrict_violation OR foreign_key_violation THEN
-  RAISE NOTICE 'PASS: pengguna penyedia yang masih dirujuk tidak dihapus';
+ DELETE FROM pengguna WHERE id = 1;
+ RAISE EXCEPTION 'FAIL: aturan ON DELETE RESTRICT tidak bekerja';
+ EXCEPTION
+ WHEN restrict_violation OR foreign_key_violation THEN
+ RAISE NOTICE 'PASS: pengguna penyedia yang masih dirujuk tidak dihapus';
  END;
 END;
 $$;

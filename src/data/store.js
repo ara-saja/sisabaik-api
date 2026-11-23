@@ -1,5 +1,5 @@
 export const penawaran = [
-{
+  {
     id: 1,
     nama: "Paket Roti Sore",
     penyedia: "Roti Minang",
@@ -7,9 +7,9 @@ export const penawaran = [
     hargaNormal: 30000,
     hargaPenawaran: 15000,
     stok: 6,
-    satuan: "paket"
-},
-{
+    satuan: "paket",
+  },
+  {
     id: 2,
     nama: "Nasi Padang Hemat",
     penyedia: "Lapau Uni Rina",
@@ -17,17 +17,18 @@ export const penawaran = [
     hargaNormal: 25000,
     hargaPenawaran: 12000,
     stok: 4,
-    satuan: "porsi"
-},
-{
+    satuan: "porsi",
+  },
+  {
     id: 3,
     nama: "Sayur Layak Olah",
+    penyedia: "Toko Tani Segar",
     kategori: "bahan-segar",
     hargaNormal: 18000,
     hargaPenawaran: 0,
     stok: 5,
-    satuan: "paket"
-}
+    satuan: "paket",
+  },
 ];
 
 export const pesanan = [];

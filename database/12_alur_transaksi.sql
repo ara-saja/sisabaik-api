@@ -1,4 +1,3 @@
-
 BEGIN;
 
 -- Migrasi tambahan: tidak membuat ulang tabel atau menghapus data latihan.
@@ -25,28 +24,23 @@ ALTER TABLE pesanan
   ADD COLUMN IF NOT EXISTS alasan_pembatalan VARCHAR(500);
 
 -- Harga sudah merupakan snapshot sejak Modul 6. Simpan juga nama dan satuan.
--- Untuk data lama, nama/satuan yang masih tersedia menjadi titik awal
--- snapshot.
+-- Untuk data lama, nama/satuan yang masih tersedia menjadi titik awal snapshot.
 ALTER TABLE detail_pesanan
   ADD COLUMN IF NOT EXISTS nama_penawaran VARCHAR(120),
   ADD COLUMN IF NOT EXISTS satuan VARCHAR(20);
-
 UPDATE detail_pesanan dp
 SET nama_penawaran = COALESCE(dp.nama_penawaran, p.nama),
     satuan = COALESCE(dp.satuan, p.satuan)
-FROM penawaran p
-WHERE p.id = dp.penawaran_id
+FROM penawaran p WHERE p.id = dp.penawaran_id
   AND (dp.nama_penawaran IS NULL OR dp.satuan IS NULL);
 
 -- Transaksi nol rupiah tidak membutuhkan pembayaran.
 -- Riwayat bernilai positif tidak otomatis dianggap sudah dibayar.
-UPDATE pesanan
-SET status_pembayaran = 'gratis'
+UPDATE pesanan SET status_pembayaran = 'gratis'
 WHERE total_transaksi = 0 AND status_pembayaran = 'belum-dibayar';
 
 CREATE INDEX IF NOT EXISTS idx_pesanan_pembeli_status
   ON pesanan (pembeli_id, status, id DESC);
-
 CREATE INDEX IF NOT EXISTS idx_pesanan_penyedia_status
   ON pesanan (penyedia_id, status, id DESC);
 

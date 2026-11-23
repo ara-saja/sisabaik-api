@@ -1,0 +1,66 @@
+
+async function daftar() {
+  if (sibuk.value) return;
+
+  error.value = "";
+  errors.value = periksaRegistrasi(form);
+
+  if (Object.keys(errors.value).length) {
+    await nextTick();
+    ringkasan.value?.focus();
+    return;
+  }
+
+  const body = {
+    namaLengkap: form.namaLengkap.trim(),
+    email: form.email.trim(),
+    kataSandi: form.kataSandi,
+  };
+
+  if (form.peran === "penyedia") {
+    Object.assign(body, {
+      namaUsaha: form.namaUsaha.trim(),
+      alamat: form.alamat.trim(),
+      nomorTelepon: form.nomorTelepon.trim(),
+    });
+  }
+
+  sibuk.value = true;
+
+  try {
+    const hasil = await api(
+      form.peran === "penyedia"
+        ? "/api/auth/registrasi-penyedia"
+        : "/api/auth/registrasi",
+      {
+        method: "POST",
+        body,
+        signal: controller.signal,
+      },
+    );
+
+    if (controller.signal.aborted) return;
+
+    akunBaru.value = hasil.data;
+    form.kataSandi = "";
+    form.konfirmasiSandi = "";
+    lihatSandi.value = false;
+
+    await nextTick();
+    selesai.value?.focus();
+  } catch (e) {
+    if (e.name !== "AbortError") {
+      error.value =
+        e.status === 409
+          ? "Pendaftaran tidak dapat diproses. Jika pernah mendaftar, coba login dengan email tersebut."
+          : e.status === 0
+            ? "Koneksi bermasalah. Periksa koneksi dan coba kembali. Jika akun sudah terbentuk, gunakan halaman login."
+            : e.message || "Pendaftaran belum berhasil. Silakan coba kembali.";
+
+      await nextTick();
+      ringkasan.value?.focus();
+    }
+  } finally {
+    sibuk.value = false;
+  }
+}
