@@ -34,14 +34,32 @@ try {
     }
     sql.push(teks.replace(/^\s*BEGIN;/, "").replace(/COMMIT;\s*$/, ""));
   }
+  
   await transaksi(async (client) => {
-    await client.query("SELECT pg_advisory_xact_lock(74091211)");
-    const cek = await client.query(`SELECT current_database() AS nama,
+  // Memastikan koneksi cloud menggunakan TLS terverifikasi.
+  const socket = client.connection.stream;
+
+  const tlsAktif = Boolean(
+    socket?.encrypted && socket?.authorized,
+  );
+
+  if (cloud && !tlsAktif) {
+    throw new Error(
+      "Koneksi cloud wajib menggunakan TLS yang terverifikasi.",
+    );
+  }
+
+  await client.query("SELECT pg_advisory_xact_lock(74091211)");
+
+  const cek = await client.query(`
+    SELECT
+      current_database() AS nama,
       to_regclass('public.pengguna') AS pengguna,
       to_regclass('public.penawaran') AS penawaran,
-      to_regclass('public.pesanan') AS pesanan,
-      (SELECT ssl FROM pg_stat_ssl WHERE pid=pg_backend_pid()) AS tls`);
-    const db = cek.rows[0];
+      to_regclass('public.pesanan') AS pesanan
+  `);
+
+  const db = cek.rows[0];
     const tujuan = cloud
       ? (process.env.CLOUD_CONFIRM_DATABASE ??
         process.env.DEMO_CONFIRM_DATABASE)
@@ -50,8 +68,7 @@ try {
       db.nama !== tujuan ||
       !db.pengguna ||
       !db.penawaran ||
-      !db.pesanan ||
-      (cloud && !db.tls)
+      !db.pesanan
     ) {
       throw new Error(
         "Database tujuan atau schema dasar belum sesuai. Data tidak direset.",
